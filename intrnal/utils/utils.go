@@ -33,7 +33,7 @@ func Flip(source map[string]int) map[int]string {
 }
 
 func Diff(source []int, comparable []int) []int {
-	hasMap := make(map[int]int, len(source))
+	hasMap := make(map[int]int, len(comparable))
 	for i, v := range comparable {
 		hasMap[v] = i
 	}
