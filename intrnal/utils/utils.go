@@ -1,7 +1,5 @@
 package utils
 
-import "fmt"
-
 func Chunk(slice []int, chunkSize int) [][]int {
 	var chunks [][]int
 	sliceLen := len(slice)
@@ -24,8 +22,6 @@ func Chunk(slice []int, chunkSize int) [][]int {
 func Flip(source map[string]int) map[int]string {
 	flippedSource := make(map[int]string)
 	for k, v := range source {
-		fmt.Println(v, k)
-
 		flippedSource[v] = k
 	}
 
