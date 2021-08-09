@@ -168,6 +168,32 @@ func TestShouldDiffSlicesIfBothSlicesAreTheSame(t *testing.T) {
 	assert.Equal(expected, result)
 }
 
+func TestShouldDiffSlicesIfComparableIsEmpty(t *testing.T) {
+	assert := assert.New(t)
+
+	source := []int{1, 2, 3, 4, 5}
+	comparable := []int{}
+
+	expected := []int{1, 2, 3, 4, 5}
+
+	result := Diff(source, comparable)
+
+	assert.Equal(expected, result)
+}
+
+func TestShouldDiffSlicesIfSourcesEmpty(t *testing.T) {
+	assert := assert.New(t)
+
+	source := []int{}
+	comparable := []int{1, 2, 3, 4, 5}
+
+	expected := []int{}
+
+	result := Diff(source, comparable)
+
+	assert.Equal(expected, result)
+}
+
 func TestShouldDiffSlicesIfBothSlicesAreEmpty(t *testing.T) {
 	assert := assert.New(t)
 
