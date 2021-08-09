@@ -1,7 +1,7 @@
 package utils
 
 func Chunk(slice []int, chunkSize int) [][]int {
-	var chunks [][]int
+	chunks := make([][]int, 0)
 	sliceLen := len(slice)
 	for i := 0; i < sliceLen; i += chunkSize {
 		end := i + chunkSize
@@ -29,9 +29,9 @@ func Flip(source map[string]int) map[int]string {
 }
 
 func Diff(source []int, comparable []int) []int {
-	hasMap := make(map[int]int, len(comparable))
-	for i, v := range comparable {
-		hasMap[v] = i
+	hasMap := make(map[int]bool, len(comparable))
+	for _, v := range comparable {
+		hasMap[v] = true
 	}
 
 	diff := make([]int, 0)

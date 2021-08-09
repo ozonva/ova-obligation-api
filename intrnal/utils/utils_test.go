@@ -24,6 +24,49 @@ func TestShouldChunkSlice(t *testing.T) {
 	assert.Equal(expected, result)
 }
 
+func TestShouldChunkSliceIfSliceIsEmpty(t *testing.T) {
+	assert := assert.New(t)
+
+	source := []int{}
+
+	result := Chunk(source, 2)
+	assert.Len(result, 0)
+
+	expected := [][]int{}
+	assert.Equal(expected, result)
+}
+
+func TestShouldChunkSliceIfChunkSizeDividesWithoutRemainderSliceLen(t *testing.T) {
+	assert := assert.New(t)
+
+	source := []int{1, 2, 3, 4, 5, 6, 7, 8}
+
+	result := Chunk(source, 2)
+	assert.Len(result, 4)
+
+	expected := [][]int{
+		{1, 2},
+		{3, 4},
+		{5, 6},
+		{7, 8},
+	}
+	assert.Equal(expected, result)
+}
+
+func TestShouldChunkSliceIfSliceLenLessThanChunkSize(t *testing.T) {
+	assert := assert.New(t)
+
+	source := []int{1, 2}
+
+	result := Chunk(source, 3)
+	assert.Len(result, 1)
+
+	expected := [][]int{
+		{1, 2},
+	}
+	assert.Equal(expected, result)
+}
+
 func TestShouldFlipWithoutDuplicates(t *testing.T) {
 	assert := assert.New(t)
 
@@ -106,6 +149,32 @@ func TestShouldDiffSlicesWithComparableDuplicates(t *testing.T) {
 	comparable := []int{3, 4, 4}
 
 	expected := []int{1, 2, 5}
+
+	result := Diff(source, comparable)
+
+	assert.Equal(expected, result)
+}
+
+func TestShouldDiffSlicesIfBothSlicesAreTheSame(t *testing.T) {
+	assert := assert.New(t)
+
+	source := []int{1, 2, 3, 4, 5}
+	comparable := source
+
+	expected := []int{}
+
+	result := Diff(source, comparable)
+
+	assert.Equal(expected, result)
+}
+
+func TestShouldDiffSlicesIfBothSlicesAreEmpty(t *testing.T) {
+	assert := assert.New(t)
+
+	source := []int{}
+	comparable := source
+
+	expected := []int{}
 
 	result := Diff(source, comparable)
 
