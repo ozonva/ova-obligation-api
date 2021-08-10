@@ -36,7 +36,7 @@ func Diff(source []int, comparable []int) []int {
 
 	diff := make([]int, 0)
 	for _, v := range source {
-		if _, ok := hasMap[v]; ok {
+		if hasMap[v] {
 			continue
 		}
 
