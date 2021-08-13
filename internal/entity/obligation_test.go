@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestObligation_ToString(t *testing.T) {
+func TestObligation_String(t *testing.T) {
 	obligation := Obligation{
 		ID:          1,
 		Title:       "Test title",
@@ -17,6 +17,8 @@ func TestObligation_ToString(t *testing.T) {
 	assert.Equal(
 		t,
 		fmt.Sprintf("ID: %d, Title: %s, Description: %s", obligation.ID, obligation.Title, obligation.Description),
-		obligation.ToString(),
+		obligation.String(),
 	)
+
+	assert.Implements(t, (*fmt.Stringer)(nil), obligation)
 }

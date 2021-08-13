@@ -8,6 +8,6 @@ type Obligation struct {
 	Description string
 }
 
-func (o Obligation) ToString() string {
+func (o Obligation) String() string {
 	return fmt.Sprintf("ID: %d, Title: %s, Description: %s", o.ID, o.Title, o.Description)
 }
