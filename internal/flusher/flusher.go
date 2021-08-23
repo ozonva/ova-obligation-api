@@ -9,7 +9,7 @@ type Flusher interface {
 	Flush(entities []entity.Obligation) []entity.Obligation
 }
 
-func New(repository repo.Repo) Flusher {
+func NewFlusher(repository repo.Repo) Flusher {
 	return &flusher{repository: repository}
 }
 
