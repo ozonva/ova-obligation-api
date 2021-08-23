@@ -32,7 +32,6 @@ func NewSaver(
 		tiker:    intervalToFlush,
 		flusher:  flusher,
 		closeCh:  make(chan bool, 1),
-		capacity: capacity,
 	}
 }
 
@@ -43,7 +42,6 @@ type saver struct {
 	tiker    time.Ticker
 	flusher  flusher.Flusher
 	closeCh  chan bool
-	capacity uint
 }
 
 func (s *saver) Save(entity entity.Obligation) error {
@@ -56,7 +54,7 @@ func (s *saver) Save(entity entity.Obligation) error {
 		return &ClosedSaverError{}
 	}
 
-	if cap(s.entities) == int(s.capacity) {
+	if cap(s.entities) == len(s.entities) {
 		s.flush()
 	}
 

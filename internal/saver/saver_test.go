@@ -22,11 +22,11 @@ func TestSaver_SaveByTimer(t *testing.T) {
 	saver := NewSaver(5, flusherMock, *time.NewTicker(100 * time.Microsecond))
 	saver.Save(entities[0])
 
-	time.Sleep(200 * time.Microsecond)
+	time.Sleep(10000 * time.Microsecond)
 
 	saver.Save(entities[0])
 
-	time.Sleep(200 * time.Microsecond)
+	time.Sleep(10000 * time.Microsecond)
 
 }
 
