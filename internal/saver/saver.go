@@ -92,12 +92,12 @@ func (s *saver) startTimer() {
 			case <-s.timer.C:
 				s.mu.Lock()
 				s.flush()
-				defer s.mu.Unlock()
+				s.mu.Unlock()
 			case <-s.closeCh:
 				close(s.closeCh)
 				s.mu.Lock()
 				s.flush()
-				defer s.mu.Unlock()
+				s.mu.Unlock()
 				return
 			}
 		}
