@@ -17,12 +17,17 @@ func TestSaver_SaveByTimer(t *testing.T) {
 	flusherMock := flusher.NewMockFlusher(ctrl)
 
 	entities := []entity.Obligation{{ID: 1}}
-	flusherMock.EXPECT().Flush(entities).Return(nil).MinTimes(1)
+	flusherMock.EXPECT().Flush(entities).Return(nil).MinTimes(2)
 
-	saver := NewSaver(5, flusherMock, *time.NewTimer(1 * time.Second))
+	saver := NewSaver(5, flusherMock, *time.NewTicker(100 * time.Microsecond))
 	saver.Save(entities[0])
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(200 * time.Microsecond)
+
+	saver.Save(entities[0])
+
+	time.Sleep(200 * time.Microsecond)
+
 }
 
 func TestSaver_SaveToClosedSaver(t *testing.T) {
@@ -34,7 +39,7 @@ func TestSaver_SaveToClosedSaver(t *testing.T) {
 	entities := []entity.Obligation{{ID: 1}}
 	flusherMock.EXPECT().Flush(entities).Return(nil).MaxTimes(0)
 
-	saver := NewSaver(5, flusherMock, *time.NewTimer(1 * time.Second))
+	saver := NewSaver(5, flusherMock, *time.NewTicker(1 * time.Second))
 	saver.Close()
 	err := saver.Save(entities[0])
 
@@ -51,7 +56,7 @@ func TestSaver_CloseClosedSaver(t *testing.T) {
 	entities := []entity.Obligation{{ID: 1}}
 	flusherMock.EXPECT().Flush(entities).Return(nil).MaxTimes(0)
 
-	saver := NewSaver(5, flusherMock, *time.NewTimer(1 * time.Second))
+	saver := NewSaver(5, flusherMock, *time.NewTicker(1 * time.Second))
 	saver.Close()
 	err := saver.Close()
 

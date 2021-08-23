@@ -23,13 +23,13 @@ type Saver interface {
 func NewSaver(
 	capacity uint,
 	flusher flusher.Flusher,
-	timerToFlush time.Timer,
+	intervalToFlush time.Ticker,
 ) Saver {
 	return &saver{
 		mu:       sync.Mutex{},
 		once:     sync.Once{},
 		entities: make([]entity.Obligation, 0, capacity),
-		timer:    timerToFlush,
+		tiker:    intervalToFlush,
 		flusher:  flusher,
 		closeCh:  make(chan bool, 1),
 		capacity: capacity,
@@ -40,7 +40,7 @@ type saver struct {
 	mu       sync.Mutex
 	once     sync.Once
 	entities []entity.Obligation
-	timer    time.Timer
+	tiker    time.Ticker
 	flusher  flusher.Flusher
 	closeCh  chan bool
 	capacity uint
@@ -89,7 +89,7 @@ func (s *saver) startTimer() {
 	go func() {
 		for {
 			select {
-			case <-s.timer.C:
+			case <-s.tiker.C:
 				s.mu.Lock()
 				s.flush()
 				s.mu.Unlock()
