@@ -31,7 +31,7 @@ func NewSaver(
 		entities: make([]entity.Obligation, 0, capacity),
 		tiker:    intervalToFlush,
 		flusher:  flusher,
-		closeCh:  make(chan bool, 1),
+		closeCh:  make(chan bool),
 	}
 }
 
@@ -68,7 +68,7 @@ func (s *saver) Close() error {
 		return &ClosedSaverError{}
 	}
 
-	s.closeCh <- true
+	close(s.closeCh)
 
 	return nil
 }
@@ -92,7 +92,6 @@ func (s *saver) startTimer() {
 				s.flush()
 				s.mu.Unlock()
 			case <-s.closeCh:
-				close(s.closeCh)
 				s.mu.Lock()
 				s.flush()
 				s.mu.Unlock()
