@@ -1,6 +1,7 @@
 package saver
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -8,12 +9,7 @@ import (
 	"github.com/ozonva/ova-obligation-api/internal/flusher"
 )
 
-type ClosedSaverError struct {
-}
-
-func (e *ClosedSaverError) Error() string {
-	return "Saver already closed"
-}
+var ErrorClosedSaver = errors.New("saver already closed")
 
 type Saver interface {
 	Save(entity entity.Obligation) error
@@ -25,19 +21,21 @@ func NewSaver(
 	flusher flusher.Flusher,
 	intervalToFlush time.Ticker,
 ) Saver {
-	return &saver{
+	instance := saver{
 		mu:       sync.Mutex{},
-		once:     sync.Once{},
 		entities: make([]entity.Obligation, 0, capacity),
 		tiker:    intervalToFlush,
 		flusher:  flusher,
 		closeCh:  make(chan bool),
 	}
+
+	instance.startTimer()
+
+	return &instance
 }
 
 type saver struct {
 	mu       sync.Mutex
-	once     sync.Once
 	entities []entity.Obligation
 	tiker    time.Ticker
 	flusher  flusher.Flusher
@@ -45,14 +43,12 @@ type saver struct {
 }
 
 func (s *saver) Save(entity entity.Obligation) error {
+	if s.isClosed() {
+		return ErrorClosedSaver
+	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	s.once.Do(s.startTimer)
-
-	if s.isClosed() {
-		return &ClosedSaverError{}
-	}
 
 	if cap(s.entities) == len(s.entities) {
 		s.flush()
@@ -65,7 +61,7 @@ func (s *saver) Save(entity entity.Obligation) error {
 
 func (s *saver) Close() error {
 	if s.isClosed() {
-		return &ClosedSaverError{}
+		return ErrorClosedSaver
 	}
 
 	close(s.closeCh)

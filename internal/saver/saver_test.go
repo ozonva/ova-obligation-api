@@ -44,7 +44,8 @@ func TestSaver_SaveToClosedSaver(t *testing.T) {
 	err := saver.Save(entities[0])
 
 	assert.NotNil(t, err)
-	assert.Error(t, err, "Saver already closed")
+	assert.Error(t, err, "saver already closed")
+	assert.ErrorIs(t, err, ErrorClosedSaver)
 }
 
 func TestSaver_CloseClosedSaver(t *testing.T) {
@@ -61,5 +62,6 @@ func TestSaver_CloseClosedSaver(t *testing.T) {
 	err := saver.Close()
 
 	assert.NotNil(t, err)
-	assert.Error(t, err, "Saver already closed")
+	assert.Error(t, err, "saver already closed")
+	assert.ErrorIs(t, err, ErrorClosedSaver)
 }
