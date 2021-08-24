@@ -18,16 +18,12 @@ type flusher struct {
 }
 
 func (f *flusher) Flush(entities []entity.Obligation) []entity.Obligation {
-	failed := make([]entity.Obligation, 0)
+	var failed []entity.Obligation
 	for _, entity := range entities {
 		if err := f.repository.AddEntity(entity); err != nil {
 			failed = append(failed, entity)
 		}
 	}
 
-	if len(failed) > 0 {
-		return failed
-	}
-
-	return nil
+	return failed
 }
