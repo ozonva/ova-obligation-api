@@ -1,0 +1,37 @@
+syntax = "proto3";
+package ova.obligation.api;
+
+option go_package = "github.com/ozonva/ova-obligation-api/pkg/ova-obligation-api;ova_obligation_api";
+
+import "google/protobuf/empty.proto";
+
+service ObligationRpc {
+    rpc CreateObligation (CreateObligationRequest) returns (Obligation);
+    rpc DescribeObligation (DescribeObligationRequest) returns (Obligation);
+    rpc ListObligations (google.protobuf.Empty) returns (ListObligationsResponse);
+    rpc RemoveObligation (RemoveObligationRequest) returns (google.protobuf.Empty);
+}
+
+message CreateObligationRequest {
+    string title = 1;
+    string description = 2;
+}
+
+message DescribeObligationRequest {
+    uint32 id = 1;
+}
+
+message RemoveObligationRequest {
+    uint32 id = 1;
+}
+
+message ListObligationsResponse {
+    repeated Obligation items = 1;
+}
+
+message Obligation {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
+  }
+  
