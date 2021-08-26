@@ -20,12 +20,12 @@ func NewObligationRpcServer(logger *zerolog.Logger) api.ObligationRpcServer {
 	}
 }
 
-func (s *ObligationServer) CreateObligation(context context.Context, request *api.CreateObligationRequest) (*api.Obligation, error) {
+func (s *ObligationServer) CreateObligation(context context.Context, request *api.CreateObligationRequest) (*api.CreateObligationResponce, error) {
 	s.logger.Info().Msgf("CreateObligation request: %v", request)
 	return s.UnimplementedObligationRpcServer.CreateObligation(context, request)
 }
 
-func (s *ObligationServer) DescribeObligation(context context.Context, request *api.DescribeObligationRequest) (*api.Obligation, error) {
+func (s *ObligationServer) DescribeObligation(context context.Context, request *api.DescribeObligationRequest) (*api.DescribeObligationResponse, error) {
 	s.logger.Info().Msgf("DescribeObligation request: %v", request)
 	return s.UnimplementedObligationRpcServer.DescribeObligation(context, request)
 }

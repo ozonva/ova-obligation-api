@@ -6,8 +6,8 @@ option go_package = "github.com/ozonva/ova-obligation-api/pkg/ova-obligation-api
 import "google/protobuf/empty.proto";
 
 service ObligationRpc {
-    rpc CreateObligation (CreateObligationRequest) returns (Obligation);
-    rpc DescribeObligation (DescribeObligationRequest) returns (Obligation);
+    rpc CreateObligation (CreateObligationRequest) returns (CreateObligationResponce);
+    rpc DescribeObligation (DescribeObligationRequest) returns (DescribeObligationResponse);
     rpc ListObligations (google.protobuf.Empty) returns (ListObligationsResponse);
     rpc RemoveObligation (RemoveObligationRequest) returns (google.protobuf.Empty);
 }
@@ -17,8 +17,16 @@ message CreateObligationRequest {
     string description = 2;
 }
 
+message CreateObligationResponce {
+    uint32 id = 1;
+}
+
 message DescribeObligationRequest {
     uint32 id = 1;
+}
+
+message DescribeObligationResponse {
+    Obligation obligation = 1;
 }
 
 message RemoveObligationRequest {
@@ -33,5 +41,4 @@ message Obligation {
     uint32 id = 1;
     string title = 2;
     string description = 3;
-  }
-  
+}

@@ -19,8 +19,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ObligationRpcClient interface {
-	CreateObligation(ctx context.Context, in *CreateObligationRequest, opts ...grpc.CallOption) (*Obligation, error)
-	DescribeObligation(ctx context.Context, in *DescribeObligationRequest, opts ...grpc.CallOption) (*Obligation, error)
+	CreateObligation(ctx context.Context, in *CreateObligationRequest, opts ...grpc.CallOption) (*CreateObligationResponce, error)
+	DescribeObligation(ctx context.Context, in *DescribeObligationRequest, opts ...grpc.CallOption) (*DescribeObligationResponse, error)
 	ListObligations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListObligationsResponse, error)
 	RemoveObligation(ctx context.Context, in *RemoveObligationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -33,8 +33,8 @@ func NewObligationRpcClient(cc grpc.ClientConnInterface) ObligationRpcClient {
 	return &obligationRpcClient{cc}
 }
 
-func (c *obligationRpcClient) CreateObligation(ctx context.Context, in *CreateObligationRequest, opts ...grpc.CallOption) (*Obligation, error) {
-	out := new(Obligation)
+func (c *obligationRpcClient) CreateObligation(ctx context.Context, in *CreateObligationRequest, opts ...grpc.CallOption) (*CreateObligationResponce, error) {
+	out := new(CreateObligationResponce)
 	err := c.cc.Invoke(ctx, "/ova.obligation.api.ObligationRpc/CreateObligation", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -42,8 +42,8 @@ func (c *obligationRpcClient) CreateObligation(ctx context.Context, in *CreateOb
 	return out, nil
 }
 
-func (c *obligationRpcClient) DescribeObligation(ctx context.Context, in *DescribeObligationRequest, opts ...grpc.CallOption) (*Obligation, error) {
-	out := new(Obligation)
+func (c *obligationRpcClient) DescribeObligation(ctx context.Context, in *DescribeObligationRequest, opts ...grpc.CallOption) (*DescribeObligationResponse, error) {
+	out := new(DescribeObligationResponse)
 	err := c.cc.Invoke(ctx, "/ova.obligation.api.ObligationRpc/DescribeObligation", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,8 +73,8 @@ func (c *obligationRpcClient) RemoveObligation(ctx context.Context, in *RemoveOb
 // All implementations must embed UnimplementedObligationRpcServer
 // for forward compatibility
 type ObligationRpcServer interface {
-	CreateObligation(context.Context, *CreateObligationRequest) (*Obligation, error)
-	DescribeObligation(context.Context, *DescribeObligationRequest) (*Obligation, error)
+	CreateObligation(context.Context, *CreateObligationRequest) (*CreateObligationResponce, error)
+	DescribeObligation(context.Context, *DescribeObligationRequest) (*DescribeObligationResponse, error)
 	ListObligations(context.Context, *emptypb.Empty) (*ListObligationsResponse, error)
 	RemoveObligation(context.Context, *RemoveObligationRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedObligationRpcServer()
@@ -84,10 +84,10 @@ type ObligationRpcServer interface {
 type UnimplementedObligationRpcServer struct {
 }
 
-func (UnimplementedObligationRpcServer) CreateObligation(context.Context, *CreateObligationRequest) (*Obligation, error) {
+func (UnimplementedObligationRpcServer) CreateObligation(context.Context, *CreateObligationRequest) (*CreateObligationResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateObligation not implemented")
 }
-func (UnimplementedObligationRpcServer) DescribeObligation(context.Context, *DescribeObligationRequest) (*Obligation, error) {
+func (UnimplementedObligationRpcServer) DescribeObligation(context.Context, *DescribeObligationRequest) (*DescribeObligationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeObligation not implemented")
 }
 func (UnimplementedObligationRpcServer) ListObligations(context.Context, *emptypb.Empty) (*ListObligationsResponse, error) {
