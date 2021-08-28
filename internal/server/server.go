@@ -51,7 +51,7 @@ func (s *ObligationServer) DescribeObligation(context context.Context, request *
 	s.logger.Info().Msgf("DescribeObligation request: %v", request)
 
 	result, err := s.repository.DescribeEntity(uint64(request.Id))
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
 		s.logger.Error().Err(err).Msg("")
 
 		if errors.Is(err, sql.ErrNoRows) {
@@ -95,7 +95,7 @@ func (s *ObligationServer) RemoveObligation(context context.Context, request *ap
 	s.logger.Info().Msgf("RemoveObligation request: %v", request)
 
 	err := s.repository.RemoveEntity(uint64(request.Id))
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
 		s.logger.Error().Err(err).Msg("")
 
 		if errors.Is(err, sql.ErrNoRows) {

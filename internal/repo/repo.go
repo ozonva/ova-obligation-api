@@ -3,7 +3,7 @@ package repo
 import (
 	dbSql "database/sql"
 
-	qb "github.com/Masterminds/squirrel"
+	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	"github.com/ozonva/ova-obligation-api/internal/entity"
 )
@@ -20,18 +20,20 @@ type Repo interface {
 
 type ObligationRepository struct {
 	db *sqlx.DB
+	qb squirrel.StatementBuilderType
 }
 
 func NewObligationRepository(db *sqlx.DB) Repo {
 	return &ObligationRepository{
 		db: db,
+		qb: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
 func (r *ObligationRepository) RemoveEntity(entityId uint64) error {
-	sql, args, err := qb.
+	sql, args, err := r.qb.
 		Delete(table).
-		Where("id", entityId).
+		Where(squirrel.Eq{"id": entityId}).
 		ToSql()
 
 	if err != nil {
@@ -56,7 +58,7 @@ func (r *ObligationRepository) RemoveEntity(entityId uint64) error {
 }
 
 func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obligation, error) {
-	sql, args, err := qb.Select("id, title, description").
+	sql, args, err := r.qb.Select("id, title, description").
 		From(table).
 		Limit(limit).
 		Offset(offset).
@@ -86,26 +88,22 @@ func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obli
 }
 
 func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
-	sql, args, err := qb.
+	sql, args, err := r.qb.
 		Insert(table).Columns("title", "description").
-		Values("title", entity.Title).Values("description", entity.Description).
+		Values(entity.Title, entity.Description).
 		ToSql()
 
 	if err != nil {
 		return err
 	}
 
-	result, err := r.db.Exec(sql, args...)
+	var id int
+	err = r.db.QueryRow(sql+" RETURNING id", args...).Scan(&id)
 	if err != nil {
 		return err
 	}
 
-	lastInsertId, err := result.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	entity.ID = uint(lastInsertId)
+	entity.ID = uint(id)
 
 	return nil
 }
@@ -127,9 +125,9 @@ func (r ObligationRepository) AddEntities(entities []*entity.Obligation) error {
 }
 
 func (r *ObligationRepository) DescribeEntity(entityId uint64) (*entity.Obligation, error) {
-	sql, args, err := qb.Select("id, title, description").
+	sql, args, err := r.qb.Select("id, title, description").
 		From(table).
-		Where("id", entityId).
+		Where(squirrel.Eq{"id": entityId}).
 		ToSql()
 
 	if err != nil {
