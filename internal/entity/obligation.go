@@ -3,9 +3,9 @@ package entity
 import "fmt"
 
 type Obligation struct {
-	ID          uint
-	Title       string
-	Description string
+	ID          uint   `db:"id"`
+	Title       string `db:"title"`
+	Description string `db:"description"`
 }
 
 func (o Obligation) String() string {

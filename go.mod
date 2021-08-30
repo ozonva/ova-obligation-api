@@ -15,6 +15,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.15.0
+	github.com/pressly/goose/v3 v3.1.0 // indirect
 	github.com/rs/zerolog v1.23.0
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/viper v1.8.1

@@ -33,7 +33,7 @@ func NewObligationRepository(db *sqlx.DB) Repo {
 func (r *ObligationRepository) RemoveEntity(entityId uint64) error {
 	sql, args, err := r.qb.
 		Delete(table).
-		Where(squirrel.Eq{"id": entityId}).
+		Where("id = ?", entityId).
 		ToSql()
 
 	if err != nil {
@@ -58,7 +58,7 @@ func (r *ObligationRepository) RemoveEntity(entityId uint64) error {
 }
 
 func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obligation, error) {
-	sql, args, err := r.qb.Select("id, title, description").
+	sql, _, err := r.qb.Select("id, title, description").
 		From(table).
 		Limit(limit).
 		Offset(offset).
@@ -68,20 +68,10 @@ func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obli
 		return nil, err
 	}
 
-	rows, err := r.db.Query(sql, args...)
+	var obligations []entity.Obligation
+	err = r.db.Select(&obligations, sql)
 	if err != nil {
 		return nil, err
-	}
-
-	var obligations []entity.Obligation
-	for rows.Next() {
-		var obligation entity.Obligation
-		err := rows.Scan(&obligation.ID, &obligation.Title, &obligation.Description)
-		if err != nil {
-			return nil, err
-		}
-
-		obligations = append(obligations, obligation)
 	}
 
 	return obligations, nil
@@ -108,7 +98,7 @@ func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
 	return nil
 }
 
-func (r ObligationRepository) AddEntities(entities []*entity.Obligation) error {
+func (r *ObligationRepository) AddEntities(entities []*entity.Obligation) error {
 	t, err := r.db.Begin()
 	if err != nil {
 		return err
@@ -127,7 +117,7 @@ func (r ObligationRepository) AddEntities(entities []*entity.Obligation) error {
 func (r *ObligationRepository) DescribeEntity(entityId uint64) (*entity.Obligation, error) {
 	sql, args, err := r.qb.Select("id, title, description").
 		From(table).
-		Where(squirrel.Eq{"id": entityId}).
+		Where("id = ?", entityId).
 		ToSql()
 
 	if err != nil {
@@ -135,9 +125,7 @@ func (r *ObligationRepository) DescribeEntity(entityId uint64) (*entity.Obligati
 	}
 
 	var obligation entity.Obligation
-
-	row := r.db.QueryRow(sql, args...)
-	err = row.Scan(&obligation.ID, &obligation.Title, &obligation.Description)
+	err = r.db.Get(&obligation, sql, args...)
 	if err != nil {
 		return nil, err
 	}
