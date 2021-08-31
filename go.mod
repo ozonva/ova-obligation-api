@@ -3,7 +3,6 @@ module github.com/ozonva/ova-obligation-api
 go 1.16
 
 require (
-	github.com/Masterminds/squirrel v1.5.0
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
@@ -15,7 +14,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.15.0
-	github.com/pressly/goose/v3 v3.1.0 // indirect
 	github.com/rs/zerolog v1.23.0
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/viper v1.8.1

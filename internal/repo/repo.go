@@ -1,10 +1,9 @@
 package repo
 
 import (
-	"database/sql"
 	dbSql "database/sql"
+	"fmt"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
 	"github.com/ozonva/ova-obligation-api/internal/entity"
 )
@@ -21,27 +20,17 @@ type Repo interface {
 
 type ObligationRepository struct {
 	db *sqlx.DB
-	qb squirrel.StatementBuilderType
 }
 
 func NewObligationRepository(db *sqlx.DB) Repo {
 	return &ObligationRepository{
 		db: db,
-		qb: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
 }
 
 func (r *ObligationRepository) RemoveEntity(entityId uint64) error {
-	sql, args, err := r.qb.
-		Delete(table).
-		Where("id = ?", entityId).
-		ToSql()
-
-	if err != nil {
-		return err
-	}
-
-	result, err := r.db.Exec(sql, args...)
+	sql := fmt.Sprintf("DELETE FROM %s WHERE id = $1", table)
+	result, err := r.db.Exec(sql, entityId)
 	if err != nil {
 		return err
 	}
@@ -59,18 +48,9 @@ func (r *ObligationRepository) RemoveEntity(entityId uint64) error {
 }
 
 func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obligation, error) {
-	sql, _, err := r.qb.Select("id, title, description").
-		From(table).
-		Limit(limit).
-		Offset(offset).
-		ToSql()
-
-	if err != nil {
-		return nil, err
-	}
-
+	sql := fmt.Sprintf("SELECT * FROM %s LIMIT $1 OFFSET $2", table)
 	var obligations []entity.Obligation
-	err = r.db.Select(&obligations, sql)
+	err := r.db.Select(&obligations, sql, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -79,12 +59,8 @@ func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obli
 }
 
 func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return err
-	}
-
-	err = r.saveEntity(tx, entity)
+	tx := r.db.MustBegin()
+	err := r.saveEntity(tx, entity)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -93,18 +69,10 @@ func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
 	return tx.Commit()
 }
 
-func (r *ObligationRepository) saveEntity(tx *sql.Tx, entity *entity.Obligation) error {
-	sql, args, err := r.qb.
-		Insert(table).Columns("title", "description").
-		Values(entity.Title, entity.Description).
-		ToSql()
-
-	if err != nil {
-		return err
-	}
-
+func (r *ObligationRepository) saveEntity(tx *sqlx.Tx, entity *entity.Obligation) error {
 	var id int
-	err = tx.QueryRow(sql+" RETURNING id", args...).Scan(&id)
+	sql := fmt.Sprintf(`INSERT INTO %s (title,description) VALUES ($1,$2) RETURNING id`, table)
+	err := tx.QueryRowx(sql, entity.Title, entity.Description).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -115,11 +83,7 @@ func (r *ObligationRepository) saveEntity(tx *sql.Tx, entity *entity.Obligation)
 }
 
 func (r *ObligationRepository) AddEntities(entities []*entity.Obligation) error {
-	tx, err := r.db.Begin()
-	if err != nil {
-		return err
-	}
-
+	tx := r.db.MustBegin()
 	for _, entity := range entities {
 		if err := r.saveEntity(tx, entity); err != nil {
 			tx.Rollback()
@@ -131,17 +95,9 @@ func (r *ObligationRepository) AddEntities(entities []*entity.Obligation) error 
 }
 
 func (r *ObligationRepository) DescribeEntity(entityId uint64) (*entity.Obligation, error) {
-	sql, args, err := r.qb.Select("id, title, description").
-		From(table).
-		Where("id = ?", entityId).
-		ToSql()
-
-	if err != nil {
-		return nil, err
-	}
-
+	sql := fmt.Sprintf("SELECT * FROM %s WHERE id = $1", table)
 	var obligation entity.Obligation
-	err = r.db.Get(&obligation, sql, args...)
+	err := r.db.Get(&obligation, sql, entityId)
 	if err != nil {
 		return nil, err
 	}
