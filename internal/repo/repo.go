@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"database/sql"
 	dbSql "database/sql"
 
 	"github.com/Masterminds/squirrel"
@@ -78,6 +79,21 @@ func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obli
 }
 
 func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	err = r.saveEntity(tx, entity)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *ObligationRepository) saveEntity(tx *sql.Tx, entity *entity.Obligation) error {
 	sql, args, err := r.qb.
 		Insert(table).Columns("title", "description").
 		Values(entity.Title, entity.Description).
@@ -88,7 +104,7 @@ func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
 	}
 
 	var id int
-	err = r.db.QueryRow(sql+" RETURNING id", args...).Scan(&id)
+	err = tx.QueryRow(sql+" RETURNING id", args...).Scan(&id)
 	if err != nil {
 		return err
 	}
@@ -99,19 +115,19 @@ func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
 }
 
 func (r *ObligationRepository) AddEntities(entities []*entity.Obligation) error {
-	t, err := r.db.Begin()
+	tx, err := r.db.Begin()
 	if err != nil {
 		return err
 	}
 
 	for _, entity := range entities {
-		if err := r.AddEntity(entity); err != nil {
-			t.Rollback()
+		if err := r.saveEntity(tx, entity); err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
 
-	return t.Commit()
+	return tx.Commit()
 }
 
 func (r *ObligationRepository) DescribeEntity(entityId uint64) (*entity.Obligation, error) {
