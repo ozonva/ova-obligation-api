@@ -59,20 +59,18 @@ func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obli
 }
 
 func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
-	tx := r.db.MustBegin()
-	err := r.saveEntity(tx, entity)
+	err := r.saveEntity(r.db, entity)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
-	return tx.Commit()
+	return nil
 }
 
-func (r *ObligationRepository) saveEntity(tx *sqlx.Tx, entity *entity.Obligation) error {
+func (r *ObligationRepository) saveEntity(query sqlx.Queryer, entity *entity.Obligation) error {
 	var id int
 	sql := fmt.Sprintf(`INSERT INTO %s (title,description) VALUES ($1,$2) RETURNING id`, table)
-	err := tx.QueryRowx(sql, entity.Title, entity.Description).Scan(&id)
+	err := query.QueryRowx(sql, entity.Title, entity.Description).Scan(&id)
 	if err != nil {
 		return err
 	}
