@@ -59,23 +59,10 @@ func (r *ObligationRepository) ListEntities(limit, offset uint64) ([]entity.Obli
 }
 
 func (r *ObligationRepository) AddEntity(entity *entity.Obligation) error {
-	err := r.saveEntity(r.db, entity)
+	err := saveEntity(r.db, entity)
 	if err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func (r *ObligationRepository) saveEntity(query sqlx.Queryer, entity *entity.Obligation) error {
-	var id int
-	sql := fmt.Sprintf(`INSERT INTO %s (title,description) VALUES ($1,$2) RETURNING id`, table)
-	err := query.QueryRowx(sql, entity.Title, entity.Description).Scan(&id)
-	if err != nil {
-		return err
-	}
-
-	entity.ID = uint(id)
 
 	return nil
 }
@@ -83,7 +70,7 @@ func (r *ObligationRepository) saveEntity(query sqlx.Queryer, entity *entity.Obl
 func (r *ObligationRepository) AddEntities(entities []*entity.Obligation) error {
 	tx := r.db.MustBegin()
 	for _, entity := range entities {
-		if err := r.saveEntity(tx, entity); err != nil {
+		if err := saveEntity(tx, entity); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -101,4 +88,17 @@ func (r *ObligationRepository) DescribeEntity(entityId uint64) (*entity.Obligati
 	}
 
 	return &obligation, nil
+}
+
+func saveEntity(query sqlx.Queryer, entity *entity.Obligation) error {
+	var id int
+	sql := fmt.Sprintf(`INSERT INTO %s (title,description) VALUES ($1,$2) RETURNING id`, table)
+	err := query.QueryRowx(sql, entity.Title, entity.Description).Scan(&id)
+	if err != nil {
+		return err
+	}
+
+	entity.ID = uint(id)
+
+	return nil
 }
