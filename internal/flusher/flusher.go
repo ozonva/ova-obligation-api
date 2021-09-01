@@ -20,7 +20,7 @@ type flusher struct {
 func (f *flusher) Flush(entities []entity.Obligation) []entity.Obligation {
 	var failed []entity.Obligation
 	for _, entity := range entities {
-		if err := f.repository.AddEntity(entity); err != nil {
+		if err := f.repository.AddEntity(&entity); err != nil {
 			failed = append(failed, entity)
 		}
 	}

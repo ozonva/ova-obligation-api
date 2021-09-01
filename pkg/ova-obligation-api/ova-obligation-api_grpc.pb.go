@@ -21,7 +21,7 @@ const _ = grpc.SupportPackageIsVersion7
 type ObligationRpcClient interface {
 	CreateObligation(ctx context.Context, in *CreateObligationRequest, opts ...grpc.CallOption) (*CreateObligationResponce, error)
 	DescribeObligation(ctx context.Context, in *DescribeObligationRequest, opts ...grpc.CallOption) (*DescribeObligationResponse, error)
-	ListObligations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListObligationsResponse, error)
+	ListObligations(ctx context.Context, in *ListObligationsRequest, opts ...grpc.CallOption) (*ListObligationsResponse, error)
 	RemoveObligation(ctx context.Context, in *RemoveObligationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -51,7 +51,7 @@ func (c *obligationRpcClient) DescribeObligation(ctx context.Context, in *Descri
 	return out, nil
 }
 
-func (c *obligationRpcClient) ListObligations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListObligationsResponse, error) {
+func (c *obligationRpcClient) ListObligations(ctx context.Context, in *ListObligationsRequest, opts ...grpc.CallOption) (*ListObligationsResponse, error) {
 	out := new(ListObligationsResponse)
 	err := c.cc.Invoke(ctx, "/ova.obligation.api.ObligationRpc/ListObligations", in, out, opts...)
 	if err != nil {
@@ -75,7 +75,7 @@ func (c *obligationRpcClient) RemoveObligation(ctx context.Context, in *RemoveOb
 type ObligationRpcServer interface {
 	CreateObligation(context.Context, *CreateObligationRequest) (*CreateObligationResponce, error)
 	DescribeObligation(context.Context, *DescribeObligationRequest) (*DescribeObligationResponse, error)
-	ListObligations(context.Context, *emptypb.Empty) (*ListObligationsResponse, error)
+	ListObligations(context.Context, *ListObligationsRequest) (*ListObligationsResponse, error)
 	RemoveObligation(context.Context, *RemoveObligationRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedObligationRpcServer()
 }
@@ -90,7 +90,7 @@ func (UnimplementedObligationRpcServer) CreateObligation(context.Context, *Creat
 func (UnimplementedObligationRpcServer) DescribeObligation(context.Context, *DescribeObligationRequest) (*DescribeObligationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeObligation not implemented")
 }
-func (UnimplementedObligationRpcServer) ListObligations(context.Context, *emptypb.Empty) (*ListObligationsResponse, error) {
+func (UnimplementedObligationRpcServer) ListObligations(context.Context, *ListObligationsRequest) (*ListObligationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListObligations not implemented")
 }
 func (UnimplementedObligationRpcServer) RemoveObligation(context.Context, *RemoveObligationRequest) (*emptypb.Empty, error) {
@@ -146,7 +146,7 @@ func _ObligationRpc_DescribeObligation_Handler(srv interface{}, ctx context.Cont
 }
 
 func _ObligationRpc_ListObligations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(ListObligationsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func _ObligationRpc_ListObligations_Handler(srv interface{}, ctx context.Context
 		FullMethod: "/ova.obligation.api.ObligationRpc/ListObligations",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ObligationRpcServer).ListObligations(ctx, req.(*emptypb.Empty))
+		return srv.(ObligationRpcServer).ListObligations(ctx, req.(*ListObligationsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

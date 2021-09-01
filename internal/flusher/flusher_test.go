@@ -28,20 +28,18 @@ var _ = Describe("Flusher", func() {
 	Describe("Writing data to storage", func() {
 		When("Write data", func() {
 			Context("Write without error", func() {
-				BeforeEach(func() {
-					mockRepo.EXPECT().AddEntity(entity.Obligation{ID: 1}).Return(nil)
-				})
 				It("Should return nil", func() {
-					result := testFlusher.Flush([]entity.Obligation{{ID: 1}})
+					newEntity := entity.Obligation{ID: 1}
+					mockRepo.EXPECT().AddEntity(&newEntity).Return(nil)
+					result := testFlusher.Flush([]entity.Obligation{newEntity})
 					Expect(result).Should(BeNil())
 				})
 			})
 			Context("Write with error", func() {
-				BeforeEach(func() {
-					mockRepo.EXPECT().AddEntity(entity.Obligation{ID: 1}).Return(errors.New("test"))
-				})
 				It("Should return not saved entity", func() {
-					result := testFlusher.Flush([]entity.Obligation{{ID: 1}})
+					newEntity := entity.Obligation{ID: 1}
+					mockRepo.EXPECT().AddEntity(&newEntity).Return(errors.New("test"))
+					result := testFlusher.Flush([]entity.Obligation{newEntity})
 					expected := []entity.Obligation{{ID: 1}}
 					Expect(result).Should(Equal(expected))
 				})

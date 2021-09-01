@@ -1,4 +1,22 @@
 BUILD_FILENAME = ova-obligation-api
+DB_PASSWORD = $(shell cat config/.env | grep POSTGRES_PASSWORD= | cut -d '=' -f2)
+DB_USER = $(shell cat config/.env | grep POSTGRES_USER= | cut -d '=' -f2)
+DB_NAME = $(shell cat config/.env | grep POSTGRES_DB= | cut -d '=' -f2)
+GOBIN = $(shell go env | grep GOPATH= | cut -d '=' -f2)/bin
+
+.PHONY: migration-status
+migration-status:
+	${GOBIN}/goose -dir=migration postgres "user=${DB_USER} dbname=${DB_NAME} password=${DB_PASSWORD} sslmode=disable" status
+
+.PHONY: migration-create
+migration-create:
+	${GOBIN}/goose -dir=migration postgres "user=${DB_USER} dbname=${DB_NAME} password=${DB_PASSWORD} sslmode=disable" \
+	create ${NAME} sql
+
+.PHONY: migration-up
+migration-up:
+	${GOBIN}/goose -dir=migration postgres "user=${DB_USER} dbname=${DB_NAME} password=${DB_PASSWORD} sslmode=disable" \
+	up
 
 .PHONY: test
 test:

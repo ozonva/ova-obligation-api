@@ -35,7 +35,7 @@ func (m *MockRepo) EXPECT() *MockRepoMockRecorder {
 }
 
 // AddEntities mocks base method.
-func (m *MockRepo) AddEntities(entities []entity.Obligation) error {
+func (m *MockRepo) AddEntities(entities []*entity.Obligation) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddEntities", entities)
 	ret0, _ := ret[0].(error)
@@ -49,7 +49,7 @@ func (mr *MockRepoMockRecorder) AddEntities(entities interface{}) *gomock.Call {
 }
 
 // AddEntity mocks base method.
-func (m *MockRepo) AddEntity(entity entity.Obligation) error {
+func (m *MockRepo) AddEntity(entity *entity.Obligation) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddEntity", entity)
 	ret0, _ := ret[0].(error)
@@ -90,4 +90,18 @@ func (m *MockRepo) ListEntities(limit, offset uint64) ([]entity.Obligation, erro
 func (mr *MockRepoMockRecorder) ListEntities(limit, offset interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListEntities", reflect.TypeOf((*MockRepo)(nil).ListEntities), limit, offset)
+}
+
+// RemoveEntity mocks base method.
+func (m *MockRepo) RemoveEntity(entityId uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveEntity", entityId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveEntity indicates an expected call of RemoveEntity.
+func (mr *MockRepoMockRecorder) RemoveEntity(entityId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveEntity", reflect.TypeOf((*MockRepo)(nil).RemoveEntity), entityId)
 }
