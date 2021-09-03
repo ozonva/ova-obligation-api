@@ -3,6 +3,7 @@ module github.com/ozonva/ova-obligation-api
 go 1.16
 
 require (
+	github.com/Shopify/sarama v1.29.1 // indirect
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
