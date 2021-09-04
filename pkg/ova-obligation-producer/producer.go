@@ -2,31 +2,20 @@ package ova_obligation_producer
 
 import (
 	"fmt"
-	"strconv"
-	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/rs/zerolog"
 )
 
 type Event string
-type topic string
 
 const (
 	Created Event = "created"
 	Updated Event = "updated"
 	Deleted Event = "deleted"
 
-	createdTopic topic = "ova_obligation_created"
-	updatedTopic topic = "ova_obligation_updated"
-	deletedTopic topic = "ova_obligation_deleted"
+	topic string = "ova_obligation"
 )
-
-var eventToTopicMap map[Event]topic = map[Event]topic{
-	Created: createdTopic,
-	Updated: updatedTopic,
-	Deleted: deletedTopic,
-}
 
 type Producer interface {
 	Publish(id uint, event Event)
@@ -62,11 +51,9 @@ func NewProducer(done <-chan bool, logger *zerolog.Logger, config ProducerConfig
 }
 
 func (p *OvaObligationProducer) Publish(id uint, event Event) {
-	topic := eventToTopicMap[event]
-	strTime := strconv.Itoa(int(time.Now().Unix()))
 	msg := &sarama.ProducerMessage{
 		Topic: string(topic),
-		Key:   sarama.StringEncoder(strTime),
+		Key:   sarama.StringEncoder(event),
 		Value: sarama.StringEncoder(fmt.Sprint(id)),
 	}
 
