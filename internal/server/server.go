@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/ozonva/ova-obligation-api/internal/entity"
 	"github.com/ozonva/ova-obligation-api/internal/repo"
 	"github.com/ozonva/ova-obligation-api/internal/utils"
@@ -35,8 +36,12 @@ func NewObligationRpcServer(logger *zerolog.Logger, repository repo.Repo, produc
 func (s *ObligationServer) MultiCreateObligation(context context.Context, request *api.MultiCreateObligationRequest) (*emptypb.Empty, error) {
 	s.logger.Info().Msgf("MultiCreateEntity request: %v", request)
 
-	obligations := []*entity.Obligation{}
+	tracer := opentracing.GlobalTracer()
 
+	span := tracer.StartSpan("Multicreate request")
+	defer span.Finish()
+
+	obligations := []*entity.Obligation{}
 	for _, v := range request.Obligations {
 		obligations = append(obligations, &entity.Obligation{
 			Title:       v.Title,
@@ -45,6 +50,7 @@ func (s *ObligationServer) MultiCreateObligation(context context.Context, reques
 	}
 
 	for _, chunkedObligations := range utils.ChunkObligationPointers(obligations, 5) {
+		createSpan := tracer.StartSpan("adding chunked obligations", opentracing.ChildOf(span.Context()))
 		err := s.repository.AddEntities(chunkedObligations)
 		if err != nil {
 			s.logger.Error().Err(err).Msg("")
@@ -54,6 +60,8 @@ func (s *ObligationServer) MultiCreateObligation(context context.Context, reques
 		for _, v := range chunkedObligations {
 			s.producer.Publish(v.ID, queue.Created)
 		}
+
+		createSpan.Finish()
 	}
 
 	return &emptypb.Empty{}, nil

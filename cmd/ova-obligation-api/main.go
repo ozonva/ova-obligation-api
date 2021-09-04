@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/ozonva/ova-obligation-api/internal/repo"
 	"github.com/ozonva/ova-obligation-api/internal/server"
 	api "github.com/ozonva/ova-obligation-api/pkg/ova-obligation-api"
@@ -15,6 +16,10 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+
+	"github.com/uber/jaeger-client-go"
+	jaegercfg "github.com/uber/jaeger-client-go/config"
+	jaegerlog "github.com/uber/jaeger-client-go/log"
 )
 
 type Config struct {
@@ -48,6 +53,24 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("")
 	}
+
+	cfg := jaegercfg.Configuration{
+		ServiceName: "ova-obligation-api",
+		Sampler: &jaegercfg.SamplerConfig{
+			Type:  jaeger.SamplerTypeConst,
+			Param: 1,
+		},
+		Reporter: &jaegercfg.ReporterConfig{
+			LogSpans: true,
+		},
+	}
+
+	tracer, closer, err := cfg.NewTracer(jaegercfg.Logger(jaegerlog.StdLogger))
+	opentracing.SetGlobalTracer(tracer)
+	if err != nil {
+		log.Fatal().Err(err).Msg("")
+	}
+	defer closer.Close()
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		config.DbHost, config.DbPort, config.DbUser, config.DbPassword, config.DbName)
