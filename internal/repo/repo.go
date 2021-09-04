@@ -16,6 +16,7 @@ type Repo interface {
 	ListEntities(limit, offset uint64) ([]entity.Obligation, error)
 	DescribeEntity(entityId uint64) (*entity.Obligation, error)
 	RemoveEntity(entityId uint64) error
+	UpdateEntity(*entity.Obligation) error
 }
 
 type ObligationRepository struct {
@@ -26,6 +27,25 @@ func NewObligationRepository(db *sqlx.DB) Repo {
 	return &ObligationRepository{
 		db: db,
 	}
+}
+
+func (r *ObligationRepository) UpdateEntity(entity *entity.Obligation) error {
+	sql := fmt.Sprintf("UPDATE %s SET title=$1, description=$2 WHERE id=$3", table)
+	result, err := r.db.Exec(sql, entity.Title, entity.Description, entity.ID)
+	if err != nil {
+		return err
+	}
+
+	rowEffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowEffected == 0 {
+		return dbSql.ErrNoRows
+	}
+
+	return nil
 }
 
 func (r *ObligationRepository) RemoveEntity(entityId uint64) error {

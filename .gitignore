@@ -2,3 +2,4 @@
 .vscode
 bin/*
 config/.env
+cmd/ova-obligation-api/.env

@@ -13,19 +13,19 @@ type Event string
 type topic string
 
 const (
-	Crated  Event = "created"
+	Created Event = "created"
 	Updated Event = "updated"
 	Deleted Event = "deleted"
 
-	createdTopci topic = "ova_obligation_created"
-	updatedTopci topic = "ova_obligation_updated"
-	deletedTopci topic = "ova_obligation_deleted"
+	createdTopic topic = "ova_obligation_created"
+	updatedTopic topic = "ova_obligation_updated"
+	deletedTopic topic = "ova_obligation_deleted"
 )
 
 var eventToTopicMap map[Event]topic = map[Event]topic{
-	Crated:  createdTopci,
-	Updated: updatedTopci,
-	Deleted: deletedTopci,
+	Created: createdTopic,
+	Updated: updatedTopic,
+	Deleted: deletedTopic,
 }
 
 type Producer interface {
@@ -34,18 +34,18 @@ type Producer interface {
 
 type ProducerConfig struct {
 	Host string
-	Port string
+	Port int
 }
 
 type OvaObligationProducer struct {
-	done     <-chan *bool
+	done     <-chan bool
 	logger   *zerolog.Logger
 	config   ProducerConfig
 	messages chan *sarama.ProducerMessage
 	producer sarama.AsyncProducer
 }
 
-func NewProducer(done <-chan *bool, logger *zerolog.Logger, config ProducerConfig) (Producer, error) {
+func NewProducer(done <-chan bool, logger *zerolog.Logger, config ProducerConfig) (Producer, error) {
 	producer := OvaObligationProducer{
 		done:     done,
 		logger:   logger,
@@ -78,7 +78,7 @@ func (p *OvaObligationProducer) init() error {
 	config.Producer.Retry.Max = 5
 	config.Producer.RequiredAcks = sarama.WaitForAll
 
-	brokers := []string{fmt.Sprintf("%s:%s", p.config.Host, p.config.Port)}
+	brokers := []string{fmt.Sprintf("%s:%d", p.config.Host, p.config.Port)}
 
 	var err error
 	p.producer, err = sarama.NewAsyncProducer(brokers, config)
@@ -86,10 +86,9 @@ func (p *OvaObligationProducer) init() error {
 		return err
 	}
 
-	defer p.producer.Close()
-	defer close(p.messages)
-
 	go func() {
+		defer p.producer.Close()
+		defer close(p.messages)
 		for {
 			select {
 			case msg := <-p.messages:
