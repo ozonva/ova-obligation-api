@@ -1,6 +1,7 @@
 package ova_obligation_producer
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/Shopify/sarama"
@@ -14,7 +15,7 @@ const (
 	Updated Event = "updated"
 	Deleted Event = "deleted"
 
-	topic string = "ova_obligation"
+	topic = "ova_obligation"
 )
 
 type Producer interface {
@@ -27,19 +28,17 @@ type ProducerConfig struct {
 }
 
 type OvaObligationProducer struct {
-	done     <-chan bool
+	contxt   context.Context
 	logger   *zerolog.Logger
 	config   ProducerConfig
-	messages chan *sarama.ProducerMessage
 	producer sarama.AsyncProducer
 }
 
-func NewProducer(done <-chan bool, logger *zerolog.Logger, config ProducerConfig) (Producer, error) {
+func NewProducer(contxt context.Context, logger *zerolog.Logger, config ProducerConfig) (Producer, error) {
 	producer := OvaObligationProducer{
-		done:     done,
-		logger:   logger,
-		config:   config,
-		messages: make(chan *sarama.ProducerMessage, 5),
+		contxt: contxt,
+		logger: logger,
+		config: config,
 	}
 
 	err := producer.init()
@@ -57,7 +56,8 @@ func (p *OvaObligationProducer) Publish(id uint, event Event) {
 		Value: sarama.StringEncoder(fmt.Sprint(id)),
 	}
 
-	p.messages <- msg
+	p.producer.Input() <- msg
+	p.logger.Log().Msgf("Produce message: key: %s, value: %s", event, fmt.Sprint(id))
 }
 
 func (p *OvaObligationProducer) init() error {
@@ -75,16 +75,11 @@ func (p *OvaObligationProducer) init() error {
 
 	go func() {
 		defer p.producer.Close()
-		defer close(p.messages)
 		for {
 			select {
-			case msg := <-p.messages:
-				p.producer.Input() <- msg
-				p.logger.Log().Msgf("Produce message: %v", msg)
-
 			case err := <-p.producer.Errors():
 				p.logger.Err(err).Msgf("Failed to produce message: %s", err.Error())
-			case <-p.done:
+			case <-p.contxt.Done():
 				return
 			}
 		}

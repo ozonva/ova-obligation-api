@@ -70,21 +70,18 @@ func (s *ObligationServer) MultiCreateObligation(context context.Context, reques
 func (s *ObligationServer) UpdateObligation(context context.Context, request *api.UpdateObligationRequest) (*emptypb.Empty, error) {
 	s.logger.Info().Msgf("UpdateEntity request: %v", request)
 
-	obligation, err := s.repository.DescribeEntity(uint64(request.Id))
+	obligation := entity.Obligation{
+		ID:          uint(request.Id),
+		Description: request.Description,
+		Title:       request.Title,
+	}
+
+	err := s.repository.UpdateEntity(&obligation)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, status.Error(codes.NotFound, "Not found")
 		}
 
-		s.logger.Error().Err(err).Msg("")
-		return nil, status.Error(codes.Internal, "Internal")
-	}
-
-	obligation.Description = request.Description
-	obligation.Title = request.Title
-
-	err = s.repository.UpdateEntity(obligation)
-	if err != nil {
 		s.logger.Error().Err(err).Msg("")
 		return nil, status.Error(codes.Internal, "Internal")
 	}

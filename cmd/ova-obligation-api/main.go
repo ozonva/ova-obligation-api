@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -92,8 +93,8 @@ func main() {
 		log.Fatal().Msgf("failed to listen: %v", err)
 	}
 
-	done := make(chan bool)
-	producer, err := queue.NewProducer(done, &log, queue.ProducerConfig{
+	context, cancel := context.WithCancel(context.Background())
+	producer, err := queue.NewProducer(context, &log, queue.ProducerConfig{
 		Host: config.KafkaHost,
 		Port: config.KafkaPort,
 	})
@@ -109,4 +110,6 @@ func main() {
 	if err := s.Serve(listen); err != nil {
 		log.Fatal().Msgf("failed to serve: %v", err)
 	}
+
+	cancel()
 }
