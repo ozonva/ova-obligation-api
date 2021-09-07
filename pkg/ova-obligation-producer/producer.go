@@ -33,13 +33,13 @@ type OvaObligationProducer struct {
 	producer sarama.AsyncProducer
 }
 
-func NewProducer(contxt context.Context, logger *zerolog.Logger, config ProducerConfig) (Producer, error) {
+func NewProducer(ctx context.Context, logger *zerolog.Logger, config ProducerConfig) (Producer, error) {
 	producer := OvaObligationProducer{
 		logger: logger,
 		config: config,
 	}
 
-	err := producer.init(contxt)
+	err := producer.init(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (p *OvaObligationProducer) Publish(id uint, event Event) {
 	p.logger.Log().Msgf("Produce message: key: %s, value: %s", event, fmt.Sprint(id))
 }
 
-func (p *OvaObligationProducer) init(contxt context.Context) error {
+func (p *OvaObligationProducer) init(ctx context.Context) error {
 	config := sarama.NewConfig()
 	config.Producer.Retry.Max = 5
 	config.Producer.RequiredAcks = sarama.WaitForAll
@@ -77,7 +77,7 @@ func (p *OvaObligationProducer) init(contxt context.Context) error {
 			select {
 			case err := <-p.producer.Errors():
 				p.logger.Err(err).Msgf("Failed to produce message: %s", err.Error())
-			case <-contxt.Done():
+			case <-ctx.Done():
 				return
 			}
 		}
