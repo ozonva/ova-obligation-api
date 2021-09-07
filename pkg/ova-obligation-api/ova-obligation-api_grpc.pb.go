@@ -23,6 +23,8 @@ type ObligationRpcClient interface {
 	DescribeObligation(ctx context.Context, in *DescribeObligationRequest, opts ...grpc.CallOption) (*DescribeObligationResponse, error)
 	ListObligations(ctx context.Context, in *ListObligationsRequest, opts ...grpc.CallOption) (*ListObligationsResponse, error)
 	RemoveObligation(ctx context.Context, in *RemoveObligationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	MultiCreateObligation(ctx context.Context, in *MultiCreateObligationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateObligation(ctx context.Context, in *UpdateObligationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type obligationRpcClient struct {
@@ -69,6 +71,24 @@ func (c *obligationRpcClient) RemoveObligation(ctx context.Context, in *RemoveOb
 	return out, nil
 }
 
+func (c *obligationRpcClient) MultiCreateObligation(ctx context.Context, in *MultiCreateObligationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ova.obligation.api.ObligationRpc/MultiCreateObligation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *obligationRpcClient) UpdateObligation(ctx context.Context, in *UpdateObligationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ova.obligation.api.ObligationRpc/UpdateObligation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ObligationRpcServer is the server API for ObligationRpc service.
 // All implementations must embed UnimplementedObligationRpcServer
 // for forward compatibility
@@ -77,6 +97,8 @@ type ObligationRpcServer interface {
 	DescribeObligation(context.Context, *DescribeObligationRequest) (*DescribeObligationResponse, error)
 	ListObligations(context.Context, *ListObligationsRequest) (*ListObligationsResponse, error)
 	RemoveObligation(context.Context, *RemoveObligationRequest) (*emptypb.Empty, error)
+	MultiCreateObligation(context.Context, *MultiCreateObligationRequest) (*emptypb.Empty, error)
+	UpdateObligation(context.Context, *UpdateObligationRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedObligationRpcServer()
 }
 
@@ -95,6 +117,12 @@ func (UnimplementedObligationRpcServer) ListObligations(context.Context, *ListOb
 }
 func (UnimplementedObligationRpcServer) RemoveObligation(context.Context, *RemoveObligationRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveObligation not implemented")
+}
+func (UnimplementedObligationRpcServer) MultiCreateObligation(context.Context, *MultiCreateObligationRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiCreateObligation not implemented")
+}
+func (UnimplementedObligationRpcServer) UpdateObligation(context.Context, *UpdateObligationRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateObligation not implemented")
 }
 func (UnimplementedObligationRpcServer) mustEmbedUnimplementedObligationRpcServer() {}
 
@@ -181,6 +209,42 @@ func _ObligationRpc_RemoveObligation_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ObligationRpc_MultiCreateObligation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiCreateObligationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObligationRpcServer).MultiCreateObligation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ova.obligation.api.ObligationRpc/MultiCreateObligation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObligationRpcServer).MultiCreateObligation(ctx, req.(*MultiCreateObligationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ObligationRpc_UpdateObligation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateObligationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ObligationRpcServer).UpdateObligation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ova.obligation.api.ObligationRpc/UpdateObligation",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ObligationRpcServer).UpdateObligation(ctx, req.(*UpdateObligationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ObligationRpc_ServiceDesc is the grpc.ServiceDesc for ObligationRpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -203,6 +267,14 @@ var ObligationRpc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveObligation",
 			Handler:    _ObligationRpc_RemoveObligation_Handler,
+		},
+		{
+			MethodName: "MultiCreateObligation",
+			Handler:    _ObligationRpc_MultiCreateObligation_Handler,
+		},
+		{
+			MethodName: "UpdateObligation",
+			Handler:    _ObligationRpc_UpdateObligation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

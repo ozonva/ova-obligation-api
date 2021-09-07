@@ -10,9 +10,26 @@ service ObligationRpc {
     rpc DescribeObligation (DescribeObligationRequest) returns (DescribeObligationResponse);
     rpc ListObligations (ListObligationsRequest) returns (ListObligationsResponse);
     rpc RemoveObligation (RemoveObligationRequest) returns (google.protobuf.Empty);
+    rpc MultiCreateObligation (MultiCreateObligationRequest) returns (google.protobuf.Empty);
+    rpc UpdateObligation (UpdateObligationRequest) returns (google.protobuf.Empty);
+}
+
+message UpdateObligationRequest {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
 }
 
 message CreateObligationRequest {
+    string title = 1;
+    string description = 2;
+}
+
+message MultiCreateObligationRequest {
+    repeated CreateObligation obligations = 1;
+}
+
+message CreateObligation {
     string title = 1;
     string description = 2;
 }
